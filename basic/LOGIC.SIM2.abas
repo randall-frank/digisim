@@ -91,20 +91,21 @@
  6001 D = 1:S = 6
  6002  ONERR  GOTO 6005
  6003  GOTO 6010
- 6005  TEXT : HOME : PRINT "AN ERROR HAS OCCURED.  SELECT AGAIN:": GOTO 6020
- 6010  TEXT : HOME : PRINT "       UTILITIES:"
- 6020  PRINT : PRINT "      1) CHANGE SLOT/DRIVE (S=";S;",D=";D;")"
- 6030  PRINT : PRINT "      2) LOAD A CIRCUIT"
- 6040  PRINT : PRINT "      3) SAVE A CIRCUIT"
- 6050  PRINT : PRINT "      4) CATALOG"
- 6051  IF JOY = 1 THEN A$ = "JOYSTICK/KEYBOARD"
- 6052  PRINT : PRINT "      5) CLEAR CURRENT CIRCUIT"
- 6053  IF JOY = 0 THEN A$ = "KEYBOARD"
- 6054  PRINT : PRINT "      6) INPUT: ";A$
- 6055  PRINT : PRINT "      7) RETURN TO ANALYSIS"
- 6057  PRINT : PRINT "      8) QUIT"
- 6060  VTAB 20: HTAB 10: PRINT "ENTER SELECTION:";: GET A$: IF A$ < "1" OR A$ > "8" THEN 6060
- 6070  HOME : ON  VAL (A$) GOTO 6100,6200,6300,6400,6700,6800,6500,6650
+ 6005  TEXT : HOME : PRINT "An error had occurred.  Select again:": GOTO 6020
+ 6010  TEXT : HOME : PRINT "       Utilities:" : PRINT : PRINT
+ 6020  PRINT "      1) Change Slot/Drive (S=";S;",D=";D;")"
+ 6030  PRINT "      2) Load a circuit"
+ 6040  PRINT "      3) Save a circuit"
+ 6050  PRINT "      4) Disk catalog"
+ 6051  IF JOY = 1 THEN A$ = "Joystick/Keyboard"
+ 6052  PRINT "      5) Clear current circuit"
+ 6053  IF JOY = 0 THEN A$ = "Keyboard"
+ 6054  PRINT "      6) Input: ";A$
+ 6055  PRINT "      7) Return to analysis"
+ 6057  PRINT "      8) Exit to AppleSoft Basic"
+ 6058  PRINT "      9) ProDOS BYE"
+ 6060  VTAB 20: HTAB 10: PRINT "Enter selection:";: GET A$: IF A$ < "1" OR A$ > "9" THEN 6060
+ 6070  HOME : ON  VAL (A$) GOTO 6100,6200,6300,6400,6700,6800,6500,6650,6850
  6100  VTAB 12: HTAB 1: PRINT "NEW S=";
  6110  GET A$: IF A$ < "0" OR A$ > "7" THEN 6110
  6120 S =  VAL (A$): PRINT A$;: PRINT "  D=";
@@ -136,6 +137,7 @@
  6750  GOTO 6010
  6800  REM JOYSTICK TOGGLE
  6810 JOY =  NOT (JOY): GOTO 6010
+ 6850  PRINT  CHR$ (4)"BYE"
  7000  REM  WAVEFORM MODIFICATION
  7010 W =  VAL (A$)
  7050 A$ = "ENTER #" +  STR$ (W) + " (USE 1&0):XXXXXXXX"

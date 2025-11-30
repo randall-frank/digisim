@@ -1,5 +1,5 @@
          ORG   $8100
-         DSK   ../bin/DRAWING2#068D00
+         DSK   ../bin/DRAWING2#068100
          TYP   $06        ; /BIN file
          LST   OFF
 
