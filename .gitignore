@@ -1,0 +1,9 @@
+merlin*/
+ciderpres*/
+bin/LOGIC2*
+bin/DRAWING2*
+bin/_*
+/*.2mg
+.vscode/
+src/VERSION.S
+older/

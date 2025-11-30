@@ -1,0 +1,8 @@
+ 10  HOME : VTAB 12: HTAB 6: PRINT "Loading Logic Simulator..."
+ 11  VTAB 1: HTAB 1: PRINT "Logic Simulator V1.0"
+ 12  PRINT "Copyright (C) 1986: Randy Frank and": PRINT "David Richards"
+ 20  PRINT CHR$(4);"BLOAD DRAWING2"
+ 30  PRINT CHR$(4);"BLOAD DRAW.TBLS"
+ 40  PRINT CHR$(4);"BLOAD BLANKDATA"
+ 50  PRINT CHR$(4);"BLOAD LOGIC2"
+ 60  PRINT CHR$(4);"RUN LOGIC.SIM2"
