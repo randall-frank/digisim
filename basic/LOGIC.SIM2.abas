@@ -50,20 +50,24 @@
  310  GOSUB 12000
  320  GOTO 200
  500  REM  HELP SCREEN
- 510  HOME : VTAB 1:A$ = "HELP MENU": GOSUB 690
- 515  VTAB 1: PRINT "  KEY:"
- 520  VTAB 4:A$ = "I,J,K,M      SELECT (X,Y) COORDINATES": GOSUB 695
- 530  VTAB 6:A$ = "^I,^J,^K,^M  STEP (X,Y) COORDINATES BY 8": GOSUB 695
- 540  VTAB 8:A$ = "L,O          SELECT GATES": GOSUB 695
- 550  VTAB 10:A$ = "P,;          SELECT WAVE FORMS": GOSUB 695
- 560  VTAB 12:A$ = "W            PUT WAVE FORM AT (X,Y)": GOSUB 695
- 570  VTAB 14:A$ = "SPACEBAR     PUT GATE AT (X,Y)": GOSUB 695
- 580  VTAB 16:A$ = "E            EDIT LINKS TO (X,Y)": GOSUB 695
- 590  VTAB 18:A$ = "T            TOGGLE: SHOW WIRES (ON/OFF)": GOSUB 695
- 600  VTAB 20:A$ = "U            UTILITIES": GOSUB 695
- 610  VTAB 22:A$ = "A            ANALYZE CURRENT SETUP": GOSUB 695
- 620  VTAB 24: PRINT "?            HELP SCREEN      (ANY KEY)";
- 625  TEXT : GET A$
+ 510  TEXT: HOME
+ 511  VTAB 1: HTAB 1: PRINT "     DigiSim Logic Simulator v1.0.0"
+ 512  PRINT "           Copyright (C) 1986"
+ 513  PRINT "     Randy Frank and David Richards"
+ 514  VTAB 5:A$ = "Action": GOSUB 690
+ 515  VTAB 5: PRINT "  Key"
+ 520  VTAB 7:A$ = "I,J,K,M     Select (X,Y) coordinates": GOSUB 695
+ 530  VTAB 8:A$ = "^I,^J,^K,^M Step (X,Y) coordinates by 8": GOSUB 695
+ 540  VTAB 9:A$ = "L,O         Select gate": GOSUB 695
+ 550  VTAB 10:A$ = "P,;         Select waveform": GOSUB 695
+ 560  VTAB 11:A$ = "W           Put waveform source at (X,Y)": GOSUB 695
+ 570  VTAB 12:A$ = "SPACEBAR    Put a gate at (X,Y)": GOSUB 695
+ 580  VTAB 13:A$ = "E           Edit links to (X,Y)": GOSUB 695
+ 590  VTAB 14:A$ = "T           Toggle wire display (On/Off)": GOSUB 695
+ 600  VTAB 15:A$ = "U           Utilities": GOSUB 695
+ 610  VTAB 16:A$ = "A           Analyze current circuit": GOSUB 695
+ 620  VTAB 17: PRINT "?           Display help "
+ 625  VTAB 20: PRINT "       Press any key to return"; : GET A$
  630  POKE 49232,0: POKE 49234,0: POKE 49237,0: POKE 49239,0: RETURN 
  690  HTAB 20 -  INT ( LEN (A$) / 2): PRINT A$: RETURN 
  695  PRINT A$: RETURN 
@@ -123,7 +127,7 @@
  6330  GOTO 6010
  6400  PRINT : PRINT CHR$(4);"CAT,S";S;",D";D
  6410  PRINT "Press any key to continue";: GET A$: GOTO 6010
- 6500  POKE 49232,0: POKE 49234,0: POKE 49237,0: POKE 49239,0: GOTO 300
+ 6500  POKE 49232,0: POKE 49234,0: POKE 49237,0: POKE 49239,0: GOTO 25
  6600  VTAB 12: HTAB 1: PRINT "Enter filename:";: INPUT F$
  6610  RETURN 
  6650  VTAB 12: HTAB 1: PRINT "OK to quit? (Y/N)";: GET A$: IF A$ <  > "Y" AND A$ <  > "N" THEN 6650
@@ -229,14 +233,17 @@
  16026  IF GS = 6 THEN A$ = " EOR"
  16027  IF GS = 7 THEN A$ = "NEOR"
  16028  IF GS = 8 THEN A$ = "NONE"
- 16029 Q1 = 35:Q2 = 0: GOSUB 15000
+ 16029 Q1 = 36:Q2 = 0: GOSUB 15000
  16030  POKE 0,255: POKE 1,8: POKE 2,GS - 1: CALL 8 * 4096 + 256 + 3: RETURN 
  16500  IF A$ = "P" THEN WS = WS + 1
  16510  IF A$ = ";" THEN WS = WS - 1
  16520  IF WS =  - 1 THEN WS = 15
  16530  IF WS = 16 THEN WS = 0
+ 16535 REM display the waveform selection
  16540 A$ =  STR$ ( INT (WS / 2) + 1)
- 16545 Q1 = 35:Q2 = 6 * 8: GOSUB 15000
+ 16545 Q1 = 35:Q2 = 11 * 8: GOSUB 15000
  16550  IF WS / 2 <  >  INT (WS / 2) THEN A$ = "I": GOTO 16560
  16555 A$ = "N"
- 16560 Q1 = 35:Q2 = 7 * 8: GOSUB 15000: RETURN 
+ 16560 Q1 = 35:Q2 = 12 * 8: GOSUB 15000
+ 16570 FOR I=1 TO 4: A$ = MID$("WAVE",I,1): Q1=35: Q2=(I+5)*8: GOSUB 15000: NEXT I
+ 16680 RETURN 

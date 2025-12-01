@@ -4,7 +4,8 @@
 0800 - Applesoft: LOGIC.SIM2
 HIMEM: $4000
 4000 - HGR2 screen
-6000 - Simulation data (e.g. EXAMPLE or BLANKDATA)
+6000 - Simulation data (e.g. EXAMPLE or BLANKDATA) $8008 bytes
+8000 - Simulation waveform data (8bytes + 8bytes for LOGIC2)
 8100 - DRAWING2 - lots of text and block drawing functions
 8D00 - LOGIC2 - Simulation code
 9000 - DRAW.TBLS - Icons
