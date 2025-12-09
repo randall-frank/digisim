@@ -34,7 +34,7 @@ with open(os.path.join("src","VERSION.S"), "w") as out:
     out.write(text)
 
 
-files = ["DRAWING2.S", "LOGIC2.S"]
+files = ["DRAWING2.S", "LOGIC2.S", "DIRROUTS.S"]
 
 log.info("Assembling 6502 source code...")
 

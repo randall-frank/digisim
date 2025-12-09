@@ -2,6 +2,7 @@ merlin*/
 ciderpres*/
 bin/LOGIC2*
 bin/DRAWING2*
+bin/DIRROUTS*
 bin/_*
 /*.2mg
 .vscode/
