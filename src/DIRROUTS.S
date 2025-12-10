@@ -45,6 +45,7 @@ PR_MODE_CANCEL = 3
          LDA   #0
          STA   RETLEN
          STA   RETNAME
+         JSR   GETPREFIX
          JSR   READFILES
          LDA   #PR_MODE_LIST
          STA   PR_MODE
@@ -70,11 +71,14 @@ WORKING
          JMP   WORKING
 
 :doit    CPY   #PR_MODE_NAME ; handle keystroke other than tab
-         BEQ   :name_mode
-         CPY   #PR_MODE_LIST
-         BEQ   :list_mode
+         BNE   :trylist
+         JMP   :name_mode
+
+:trylist CPY   #PR_MODE_LIST
+         BNE   :tryret
+         JMP   :list_mode
                             ; handle PR_MODE_OK and PR_MODE_CANCEL
-         CMP   #141       ; return character
+:tryret  CMP   #141       ; return character
          BNE   WORKING
          DEY
          DEY
@@ -87,9 +91,9 @@ WORKING
          CMP   #155       ; ESC character
          BEQ   :doesc
          CMP   #139       ; up character
-         BEQ   :plus
-         CMP   #138       ; down character
          BEQ   :minus
+         CMP   #138       ; down character
+         BEQ   :plus
          CMP   #149       ; right character
          BEQ   :plus
          CMP   #136       ; left character
@@ -110,21 +114,80 @@ WORKING
 :newtop  STY   PR_NAMETOP
          JSR   DRAWFILES
          JSR   DRAWMODE
+:bye     JMP   WORKING
+
+:doesc   LDY   PREFIX
+         CPY   #1
+         BEQ   :bye
+         DEY              ; skip the trailing '/'
+:loop    LDA   PREFIX,Y
+         CMP   #$2F       ; slash
+         BEQ   :found
+         DEY
+         BNE   :loop
+:found   STY   PREFIX
+         LDA   #0
+         STA   PFXBUF,Y
+         JMP   :newpfx
+
+:doret   LDY   PR_NAMETOP
+         TYA              ; (TMP0) is the filename
+         LSR              ; high order bits become low order bits in the high byte
+         LSR              ; basically the upper part of a 16bit x16 operation
+         LSR
+         LSR
+         ORA   #>NAMELIST
+         STA   TMP1
+         TYA               ; map lower 4 bits to high bits (multi by 16)
+         ASL
+         ASL
+         ASL
+         ASL
+         STA   TMP0
+         LDA   NAMETYPE,Y ; check the type
+         CMP   #$0F
+         BEQ   :isdir
+
+         LDY   #0         ; ret on a filename copies it to the RETNAME field
+:next    LDA   (TMP0),Y
+         BEQ   :endstr
+         STA   RETNAME,Y
+         INY
+         BNE   :next
+:endstr  STY   RETLEN
+         LDA   #0
+         STA   RETNAME,Y
+         JSR   DRAWNAME
          JMP   WORKING
 
-:doesc
-:doret   
+:isdir   LDY   #0         ; ret on a directory name changes the prefix
+         LDX   PREFIX
+:another LDA   (TMP0),Y
+         BEQ   :send
+         STA   PFXBUF,X
+         INX
+         INY
+         JMP   :another
+:send    LDA   #$2F
+         STA   PFXBUF,X
+         LDA   #0
+         INX
+         STA   PFXBUF,X
+         STX   PREFIX
+:newpfx  JSR   SETPREFIX
+         JSR   READFILES
+         JSR   DRAWSCREEN
          JMP   WORKING
 
 :name_mode                ; Handle filename edit
          LDY   RETLEN
-         CMP   #136       ; left (BS) character
+         CMP   #136     ; left (BS) character
          BEQ   :del
-         CMP   #255       ; del character
+         CMP   #255     ; del character
          BEQ   :del
 
-         CPY   #15          ; ok to append character?
-         BGE   :done
+         CPY   #15        ; ok to append character?
+         BGE   :done2
 
 * legal chars: [A-Z],[0-9],'.'
          AND   #$7F
@@ -150,7 +213,7 @@ WORKING
 :done    LDA   #0
          STA   RETNAME,Y
          STY   RETLEN
-         JSR   DRAWNAME
+:done2   JSR   DRAWNAME
          JMP   WORKING
 
 PR_XPOS  DFB   0
@@ -293,9 +356,9 @@ DRAWMODE
          STA   (TPTR),Y
          RTS
 
-SELTABY  DFB   8,19,21,21
-SELTABX1 DFB   0,0,0,10
-SELTABX2 DFB   18,18,7,17
+SELTABY  DFB   12,19,21,21
+SELTABX1 DFB   0,  0, 0,10
+SELTABX2 DFB   18,18, 7,17
 
 DRAWNAME
          LDA   #$80
@@ -315,6 +378,9 @@ DRAWNAME
          JSR   PR_OUTCHAR
 :nocurs  LDA   #$A0
          JSR   PR_OUTCHAR
+         LDA   PR_XPOS
+         CMP   #16
+         BLT   :nocurs
          RTS  
 
 DRAWPREFIX
@@ -326,6 +392,8 @@ DRAWPREFIX
          LDY   #>PFXBUF
          LDA   #<PFXBUF
          JSR   PR_OUTSTR
+         LDA   #$A0
+         JSR   PR_OUTCHAR
          LDA   #$00
          STA   PR_MASK
          RTS
@@ -338,9 +406,12 @@ DRAWFILES                 ; 9 filenames starting at line 8
          JSR   PR_SET_POS
          LDA   #9
          STA   TMP0       ; number of slots to render
+         SEC
          LDA   PR_NAMETOP
-         STA   TMP1
+         SBC   #4
+         STA   TMP1       ; this is the file to render (note, could be negative)
 :top     LDA   TMP1
+         BMI   :empty
          CMP   PR_NAMECOUNT
          BGE   :empty
          LSR              ; high order bits become low order bits in the high byte
@@ -419,7 +490,6 @@ READFILES
          LDA   #0
          STA   PR_NAMECOUNT
          STA   PR_NAMETOP
-         JSR   GETPREFIX
          LDA   PREFIX
          CMP   #2
          BGE   :readdir
@@ -453,7 +523,7 @@ CANCELTXT
          ASC   "<Cancel>"
          HEX   00
 
-SETPREFIX 
+SETPREFIX
          JSR   MLI
          HEX   C6
          DA    PPARAMS
