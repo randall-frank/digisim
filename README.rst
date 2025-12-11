@@ -77,12 +77,8 @@ the gate.  A waveform can be redefined using the number keys to select the wavef
 and then the 1&0 keys to enter the 8 values.  The simulation can be updated using
 the 'A' key which recomputes all of the gate outputs.
 
-.. note::
-
-   All of the keystrokes can be seen by pressing '?' to display a help screen.
-
-
-Other options: loading, saving and quitting the program are accessed using the 
+All of the valid keystrokes can be seen by pressing '?' to display a help screen.
+Other options (loading, saving and quitting the program) are accessed using the 
 utilities menu via the 'U' key.  Generally, simulation files have been saved
 using the '.DS' suffix, but this is not enforced by the program.  All files are
 8200 byte files of type BIN. 
