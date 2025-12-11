@@ -57,8 +57,8 @@ TEX2     INC   INDEX
          STA   TEMP1
          LDY   CURX
          PLA
-         AND   #$3F         ; 64 characters
-         LDX   #%01001001   ; $49 -> $9200-$93FF
+         AND   #$3F       ; 64 characters
+         LDX   #%01001001 ; $49 -> $9200-$93FF
          STX   MOD+2
          ASL
          ASL

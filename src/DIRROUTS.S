@@ -1,5 +1,5 @@
-         ORG   $8800
-         DSK   ../bin/DIRROUTS#068800
+         ORG   $3A00
+         DSK   ../bin/DIRROUTS#063A00
          TYP   $06        ; /BIN file
 
 * This file is designed to be included into another source file
@@ -20,44 +20,56 @@ TPTR     =     $26
 TMP0     =     0
 TMP1     =     1
 
-RETLEN   =  $280
-RETNAME  =  $281
-RETSTATUS =  $290
+* Basic interface on call:
+* $280: proposed filename length (0) is none
+* $281: proposed filename (up to 15 chars)
+* $290: 1=save file, 0=read file
+* Directory prefix is the starting point
+*
+* On return:
+* $280: filename length
+* $281: filename (up to 15 chars)
+* $290: status 0=ok, 1=cancel
+* Directory prefix will have been set on ok
+
+RETLEN   =     $280
+RETNAME  =     $281
+RETSTATUS =    $290     
 TMPBUFFER =    $4A00      ; for i/o operations buffering
 FILEBUFFER =   $4B00      ; $400 (1024) bytes for ProDOS fil buffer
 
 * space for 256 filenames
+
 NAMETYPE =     $4F00      ; 256 bytes for the corresponding file type
 NAMELIST =     $5000      ; $1000 (4096) bytes for 256x16 filenames
 
 * TAB switches between modes
 
-PR_MODE_LIST = 0
-PR_MODE_NAME = 1
-PR_MODE_OK = 2
-PR_MODE_CANCEL = 3
-
+PR_MODE_LIST =     0
+PR_MODE_NAME =     1
+PR_MODE_OK =     2
+PR_MODE_CANCEL =     3
 
 * Interaction logic
 
-         LDA   #1         ; test 'save' mode
+         LDA   RETSTATUS
          STA   PR_SAVE
+         LDY   RETLEN
          LDA   #0
-         STA   RETLEN
-         STA   RETNAME
+         STA   RETNAME,Y  ; zero terminate the filename
          JSR   GETPREFIX
          JSR   READFILES
          LDA   #PR_MODE_LIST
          STA   PR_MODE
          JSR   DRAWSCREEN
-WORKING  
+WORKING
          LDA   $C000
          BPL   WORKING
          STA   $C010
          LDY   PR_MODE
          CMP   #137       ; TAB character
          BNE   :doit
-         LDX   PR_SAVE     ; handle a mode change
+         LDX   PR_SAVE    ; handle a mode change
          CPX   #1
          BEQ   :save
          CPY   #PR_MODE_LIST ; in load mode, skip NAME field
@@ -77,7 +89,7 @@ WORKING
 :trylist CPY   #PR_MODE_LIST
          BNE   :tryret
          JMP   :list_mode
-                            ; handle PR_MODE_OK and PR_MODE_CANCEL
+                          ; handle PR_MODE_OK and PR_MODE_CANCEL
 :tryret  CMP   #141       ; return character
          BNE   WORKING
          DEY
@@ -85,9 +97,9 @@ WORKING
          STY   RETSTATUS
          RTS
 
-:list_mode                ; handle list manipulation
+:list_mode                  ; handle list manipulation
          CMP   #141       ; return character
-         BEQ   :doret         
+         BEQ   :doret
          CMP   #155       ; ESC character
          BEQ   :doesc
          CMP   #139       ; up character
@@ -138,7 +150,7 @@ WORKING
          LSR
          ORA   #>NAMELIST
          STA   TMP1
-         TYA               ; map lower 4 bits to high bits (multi by 16)
+         TYA              ; map lower 4 bits to high bits (multi by 16)
          ASL
          ASL
          ASL
@@ -179,11 +191,11 @@ WORKING
          JSR   DRAWSCREEN
          JMP   WORKING
 
-:name_mode                ; Handle filename edit
+:name_mode                  ; Handle filename edit
          LDY   RETLEN
-         CMP   #136     ; left (BS) character
+         CMP   #136       ; left (BS) character
          BEQ   :del
-         CMP   #255     ; del character
+         CMP   #255       ; del character
          BEQ   :del
 
          CPY   #15        ; ok to append character?
@@ -206,7 +218,7 @@ WORKING
          INY
          JMP   :done
 
-:del     CPY   #0   
+:del     CPY   #0
          BEQ   :done
          DEY
 
@@ -222,19 +234,19 @@ PR_XROOT DFB   0
 PR_WRAP  DFB   40         ; if XPOS >= WRAP, then NL
 PR_SAVE  DFB   0
 PR_MASK  DFB   0
-PR_NAMECOUNT DFB 0
-PR_NAMETOP DFB 0
+PR_NAMECOUNT DFB   0
+PR_NAMETOP DFB   0
 PR_MODE  DFB   PR_MODE_LIST
 
 PR_INIT  STA   MOUSEFNT
          LDA   #40
                           ; Fall though to set the wrap to 40
 
-PR_SET_WRAP               ; wrap column number in A
+PR_SET_WRAP                  ; wrap column number in A
          STA   PR_WRAP
          RTS
 
-PR_SET_POS                ; position in X,Y [0,39][0,23]
+PR_SET_POS                  ; position in X,Y [0,39][0,23]
          STX   PR_XPOS
          STX   PR_XROOT
          STY   PR_YPOS
@@ -248,7 +260,7 @@ PR_REPOS                  ; sets up TPTR from PR_YPOS, destroys A,Y
          STA   TPTR+0
          RTS
 
-PR_OUTCHAR                ; char in A, assumes PR_REPOS has been called, destroys A,Y
+PR_OUTCHAR                  ; char in A, assumes PR_REPOS has been called, destroys A,Y
          CMP   #0         ; null terminated
          BEQ   :done
          CMP   #10        ; newline
@@ -272,7 +284,7 @@ PR_OUTCHAR                ; char in A, assumes PR_REPOS has been called, destroy
          STY   PR_XPOS
 :done    RTS
 
-PR_OUTSTR                 ; address of string in Y(hi), A(lo), destroys A,Y
+PR_OUTSTR                  ; address of string in Y(hi), A(lo), destroys A,Y
          STY   SRC+2
          STA   SRC+1
 SRC      LDA   $FFFF
@@ -288,7 +300,7 @@ TEXTTAB_HI
          HEX   0404050506060707
          HEX   0404050506060707
          HEX   0404050506060707
-   
+
 TEXTTAB_LO
          HEX   0080008000800080
          HEX   28A828A828A828A8
@@ -335,13 +347,19 @@ DRAWSCREEN
          STX   PR_XPOS
          LDY   #>CANCELTXT
          LDA   #<CANCELTXT
-         JSR   PR_OUTSTR         
+         JSR   PR_OUTSTR
          JSR   DRAWPREFIX
          JSR   DRAWFILES
          JSR   DRAWNAME
+         LDX   #8
+         LDY   #23
+         JSR   PR_SET_POS
+         LDY   #>TABTXT
+         LDA   #<TABTXT
+         JSR   PR_OUTSTR
          JMP   DRAWMODE
 
-DRAWMODE         
+DRAWMODE
          LDX   PR_MODE
          LDA   SELTABY,X
          STA   PR_YPOS
@@ -381,7 +399,7 @@ DRAWNAME
          LDA   PR_XPOS
          CMP   #16
          BLT   :nocurs
-         RTS  
+         RTS
 
 DRAWPREFIX
          LDX   #1
@@ -398,7 +416,7 @@ DRAWPREFIX
          STA   PR_MASK
          RTS
 
-DRAWFILES                 ; 9 filenames starting at line 8
+DRAWFILES                  ; 9 filenames starting at line 8
          LDA   #$80
          STA   PR_MASK
          LDX   #1
@@ -441,7 +459,7 @@ DRAWFILES                 ; 9 filenames starting at line 8
          DEC   TMP0
          BNE   :top
          LDA   #$00
-         STA   PR_MASK         
+         STA   PR_MASK
          RTS
 
 DRAWTYPE                  ; some hard coded type:  SYS, DIR, BAS, BIN, TXT
@@ -464,13 +482,13 @@ DRAWTYPE                  ; some hard coded type:  SYS, DIR, BAS, BIN, TXT
          AND   #$0f
          ORA   #$B0
          STA   TYPETXT+2
-         PLA   
+         PLA
          LSR
          LSR
          LSR
          LSR
          ORA   #$B0
-         STA   TYPETXT+1         
+         STA   TYPETXT+1
          LDX   #0
 :render  LDA   TYPETXT,X
          BEQ   :done
@@ -480,7 +498,18 @@ DRAWTYPE                  ; some hard coded type:  SYS, DIR, BAS, BIN, TXT
 :done    RTS
 
 
-TYPETXT  ASC  "$XX",$00, "SYS",$00, "DIR",$00, "BAS",$00, "BIN",$00, "TXT",$00
+TYPETXT  ASC   "$XX"
+         HEX   00
+         ASC   "SYS"
+         HEX   00
+         ASC   "DIR"
+         HEX   00
+         ASC   "BAS"
+         HEX   00
+         ASC   "BIN"
+         HEX   00
+         ASC   "TXT"
+         HEX   00
 
 READFILES
          LDA   #>NAMELIST
@@ -508,19 +537,27 @@ PREFIXTXT
          HEX   00
 
 FILELISTTXT
-         ASC   "Files (",$4D,"=down/sel,esc=up,",$48,$4A,$55,$4B,"=pick):"
+         ASC   "Files ("
+         HEX   4D
+         ASC   "=down/sel,esc=up,"
+         HEX   484A554B
+         ASC   "=pick):"
          HEX   00
 
 FILENAMETXT
          ASC   "Filename:"
          HEX   00
 
-OKTXT         
+OKTXT
          ASC   "<  OK  >"
          HEX   00
 
 CANCELTXT
          ASC   "<Cancel>"
+         HEX   00
+
+TABTXT
+         ASC   "(tab=change input focus)"
          HEX   00
 
 SETPREFIX
@@ -529,7 +566,7 @@ SETPREFIX
          DA    PPARAMS
          RTS
 
-GETPREFIX 
+GETPREFIX
          JSR   MLI
          HEX   C7
          DA    PPARAMS
@@ -637,7 +674,7 @@ DOCATALOG
          CPY   #$10
          BNE   :zero
          INC   PR_NAMECOUNT
-:skip    DEC   TMP0       
+:skip    DEC   TMP0
          BNE   :entry     ; next entry in this page
 
          LDA   #5         ; start a new page by reading the trailer + next header
@@ -661,7 +698,7 @@ RPDOS    HEX   0401
 DBUFF    DA    $0000
 DLEN     DA    $0000
          HEX   0000
-         
+
 OPENPRE  JSR   MLI        ; open prefix as a file
          HEX   C8
          DA    OPPRE

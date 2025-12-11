@@ -1,9 +1,9 @@
  5  POKE 33,40
  6 JOY = 0: REM  JOYSTICK TOGGLE
- 10  HIMEM: 4 * 4096
+ 10  HIMEM: 3*4096 + 4*256: REM HIMEM: 4 * 4096
  11  ONERR  GOTO 6005
- 20 X = 0:Y = 0:XP = 0:YP = 0
- 25 W1 = 1
+ 20 X = 0:Y = 0:XP = 0:YP = 0:PG=0
+ 25 W1 = 1:F$ = "BLANKDATA"
  30  GOSUB 10000
  40 GS = 1
  55  GOSUB 16020
@@ -17,10 +17,11 @@
  206  IF A$ = "O" OR A$ = "L" THEN  GOSUB 16000: GOTO 200
  208  IF A$ = "P" OR A$ = ";" THEN  GOSUB 16500: GOTO 200
  210  POKE 0,255: POKE 1,X: POKE 2,Y: CALL 8 * 4096 + 259
- 220  IF A$ = "I" THEN Y = Y - 1
- 230  IF A$ = "M" THEN Y = Y + 1
- 240  IF A$ = "J" THEN X = X - 1
- 250  IF A$ = "K" THEN X = X + 1
+ 215  IF PG = 1 THEN 255
+ 220  IF A$ = "I" OR ASC(A$) = 11 THEN Y = Y - 1
+ 230  IF A$ = "M" OR ASC(A$) = 10 THEN Y = Y + 1
+ 240  IF A$ = "J" OR ASC(A$) = 8 THEN X = X - 1
+ 250  IF A$ = "K" OR ASC(A$) = 21 THEN X = X + 1
  255  IF A$ = "A" THEN  CALL 8 * 4096 + 13 * 256: GOSUB 12000: GOTO 300
  257  IF A$ = "?" THEN  GOSUB 500: GOTO 300
  259  IF A$ = "W" THEN  GOSUB 9100: GOTO 300
@@ -29,13 +30,15 @@
  270  IF A$ = "E" THEN  GOSUB 8000: GOTO 300
  271  IF A$ = "T" THEN W1 =  NOT (W1): GOSUB 11000: GOTO 300
  275  IF A$ >  = "1" AND A$ <  = "8" THEN  GOSUB 7000: GOTO 300
+ 277  IF A$ = "S" THEN PG = 1 - PG : GOTO 300
  280  IF A$ = "D" THEN  GOSUB 6000: GOTO 300
  281  IF A$ = "U" THEN 6000
- 285 XG = XP:YG = YP
- 286  IF  ASC (A$) = 9 THEN YP = YP - 8
- 287  IF  ASC (A$) = 10 THEN XP = XP - 8
- 288  IF  ASC (A$) = 11 THEN XP = XP + 8
- 289  IF  ASC (A$) = 13 THEN YP = YP + 8
+ 284 XG = XP:YG = YP
+ 285  IF PG = 0 THEN 290
+ 286  IF  A$ = "I" OR ASC(A$) = 11 THEN YP = YP - 8
+ 287  IF  A$ = "J" OR ASC(A$) = 8  THEN XP = XP - 8
+ 288  IF  A$ = "K" OR ASC(A$) = 21 THEN XP = XP + 8
+ 289  IF  A$ = "M" OR ASC(A$) = 10 THEN YP = YP + 8
  290  IF X = 8 THEN XP = XP + 1:X = 7
  291  IF X =  - 1 THEN XP = XP - 1:X = 0
  292  IF Y = 8 THEN YP = YP + 1:Y = 7
@@ -56,17 +59,19 @@
  513  PRINT "     Randy Frank and David Richards"
  514  VTAB 5:A$ = "Action": GOSUB 690
  515  VTAB 5: PRINT "  Key"
- 520  VTAB 7:A$ = "I,J,K,M     Select (X,Y) coordinates": GOSUB 695
- 530  VTAB 8:A$ = "^I,^J,^K,^M Step (X,Y) coordinates by 8": GOSUB 695
- 540  VTAB 9:A$ = "L,O         Select gate": GOSUB 695
- 550  VTAB 10:A$ = "P,;         Select waveform": GOSUB 695
- 560  VTAB 11:A$ = "W           Put waveform source at (X,Y)": GOSUB 695
- 570  VTAB 12:A$ = "SPACEBAR    Put a gate at (X,Y)": GOSUB 695
- 580  VTAB 13:A$ = "E           Edit links to (X,Y)": GOSUB 695
- 590  VTAB 14:A$ = "T           Toggle wire display (On/Off)": GOSUB 695
- 600  VTAB 15:A$ = "U           Utilities": GOSUB 695
- 610  VTAB 16:A$ = "A           Analyze current circuit": GOSUB 695
- 620  VTAB 17: PRINT "?           Display help "
+ 520  VTAB 7: PRINT "IJKM,arrows Select (X,Y) coordinates"
+ 525  V$ = "SINGLE/page" : IF PG = 1 THEN V$ = "single/PAGE"
+ 530  VTAB 8: PRINT "S           Step by "+V$
+ 540  VTAB 9: PRINT "L,O          Select gate"
+ 550  VTAB 10: PRINT "P,;         Select waveform"
+ 560  VTAB 11: PRINT "W           Put waveform source at (X,Y)"
+ 570  VTAB 12: PRINT "SPACE       Put a gate at (X,Y)"
+ 580  VTAB 13: PRINT "E           Edit links to (X,Y)"
+ 590  VTAB 14: PRINT "T           Toggle wire display (On/Off)"
+ 600  VTAB 15: PRINT "U           Utilities (I/O, exit, ...)"
+ 610  VTAB 16: PRINT "A           Analyze current circuit"
+ 615  VTAB 17: PRINT "1-8         Edit corresponding waveform"
+ 620  VTAB 18: PRINT "?           Display help "
  625  VTAB 20: PRINT "       Press any key to return"; : GET A$
  630  POKE 49232,0: POKE 49234,0: POKE 49237,0: POKE 49239,0: RETURN 
  690  HTAB 20 -  INT ( LEN (A$) / 2): PRINT A$: RETURN 
@@ -91,42 +96,55 @@
  770  IF V1 - 127 > 0 THEN A$ = "M"
  780  IF V1 - 127 <  = 0 THEN A$ = "I"
  799  GOTO 206
+ 2000 REM I/O load
+ 2010 GOSUB 2200 : F$ = ""
+ 2020 POKE A+16, 0
+ 2040 CALL 3*4096 + 10*256
+ 2050 IF PEEK(A+16) = 1 THEN RETURN
+ 2060 GOSUB 2300
+ 2070 RETURN
+ 2100 REM I/O save
+ 2110 GOSUB 2200 : F$ = ""
+ 2120 POKE A+16, 1
+ 2140 CALL 3*4096 + 10*256
+ 2150 IF PEEK(A+16) = 1 THEN RETURN
+ 2160 GOSUB 2300
+ 2170 RETURN
+ 2200 A = 512 + 128
+ 2210 IF LEN(F$) < 1 THEN 2230
+ 2220 FOR I=1 TO LEN(F$) : POKE A+I, ASC(MID$(F$,I,1)) : NEXT I
+ 2230 POKE A, LEN(F$)
+ 2240 RETURN
+ 2300 A = 512 + 128 : F$ = ""
+ 2310 N = PEEK(A) : IF N < 1 THEN RETURN
+ 2320 FOR I=1 TO N : F$ = F$ + CHR$(PEEK(A+I)) : NEXT I
+ 2330 RETURN
  6000  REM  :: UTILITIES
  6001 D = 1:S = 6
  6002  ONERR  GOTO 6005
  6003  GOTO 6010
  6005  TEXT : HOME : PRINT "An error had occurred.  Select again:": GOTO 6020
  6010  TEXT : HOME : PRINT "       Utilities:" : PRINT : PRINT
- 6020  PRINT "      1) Change Slot/Drive (S=";S;",D=";D;")"
- 6030  PRINT "      2) Load a circuit"
- 6040  PRINT "      3) Save a circuit"
- 6050  PRINT "      4) Disk catalog"
+ 6020  PRINT "      1) Load a circuit" : PRINT
+ 6040  PRINT "      2) Save a circuit" : PRINT
  6051  IF JOY = 1 THEN A$ = "Joystick/Keyboard"
- 6052  PRINT "      5) Clear current circuit"
+ 6052  PRINT "      3) Clear the current circuit" : PRINT
  6053  IF JOY = 0 THEN A$ = "Keyboard"
- 6054  PRINT "      6) Input: ";A$
- 6055  PRINT "      7) Return to analysis"
- 6057  PRINT "      8) Exit to AppleSoft Basic"
- 6058  PRINT "      9) ProDOS BYE"
- 6060  VTAB 20: HTAB 10: PRINT "Enter selection:";: GET A$: IF A$ < "1" OR A$ > "9" THEN 6060
- 6070  HOME : ON  VAL (A$) GOTO 6100,6200,6300,6400,6700,6800,6500,6650,6850
- 6100  VTAB 12: HTAB 1: PRINT "NEW S=";
- 6110  GET A$: IF A$ < "0" OR A$ > "7" THEN 6110
- 6120 S =  VAL (A$): PRINT A$;: PRINT "  D=";
- 6130  GET A$: IF A$ < "1" OR A$ > "2" THEN 6130
- 6140 D =  VAL (A$): PRINT A$
- 6150  GOTO 6010
- 6200  GOSUB 6600
+ 6054  PRINT "      4) Input: ";A$ : PRINT
+ 6055  PRINT "      5) Return to analysis" : PRINT
+ 6057  PRINT "      6) Exit to AppleSoft Basic" : PRINT
+ 6058  PRINT "      7) ProDOS BYE" : PRINT
+ 6060  VTAB 20: HTAB 10: PRINT "Enter selection:";: GET A$: IF A$ < "1" OR A$ > "7" THEN 6060
+ 6070  HOME : ON  VAL (A$) GOTO 6200,6300,6700,6800,6500,6650,6850
+ 6200  GOSUB 2000
  6210  IF F$ = "" THEN 6010
- 6220  PRINT : PRINT CHR$(4);"BLOAD ";F$;",A$6000,S";S;",D";D
+ 6220  PRINT : PRINT CHR$(4);"BLOAD ";F$;",A$6000"
  6230  GOSUB 11000: GOSUB 12000: GOSUB 13000
  6240  GOTO 6010
- 6300  GOSUB 6600
+ 6300  GOSUB 2100
  6310  IF F$ = "" THEN 6010
- 6320  PRINT : PRINT CHR$(4);"BSAVE ";F$;",A$6000,L$2009,S";S;",D";D
+ 6320  PRINT : PRINT CHR$(4);"BSAVE ";F$;",A$6000,L$2008"
  6330  GOTO 6010
- 6400  PRINT : PRINT CHR$(4);"CAT,S";S;",D";D
- 6410  PRINT "Press any key to continue";: GET A$: GOTO 6010
  6500  POKE 49232,0: POKE 49234,0: POKE 49237,0: POKE 49239,0: GOTO 25
  6600  VTAB 12: HTAB 1: PRINT "Enter filename:";: INPUT F$
  6610  RETURN 
@@ -205,7 +223,7 @@
  10000  HGR2 
  10010  HCOLOR= 3
  10020  GOSUB 11000: REM  PAGE DRAW
- 10030  GOSUB 12000: REM   GATE DATA
+ 10030  GOSUB 12000: REM  GATE DATA
  10040  GOSUB 13000
  10050  FOR Q8 = 1 TO 7
  10060  POKE 0,Q8: POKE 1,8: POKE 2,Q8 - 1
