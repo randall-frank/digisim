@@ -9,7 +9,7 @@ DigiSim
    :target: https://github.com/AppleWin/AppleWin
 
 .. |Itch| image:: https://img.shields.io/badge/Itch.io-fa5c5c.svg
-   :target: https://myleftgoat.itch.io/
+   :target: https://myleftgoat.itch.io/digisim
 
 
 .. image:: banner.png
@@ -19,24 +19,23 @@ DigiSim
 
 Overview
 --------
-This is an old board game written back in 1986 for the Apple II.  Patterned after
-chess and an old physical board game of the same name, the idea is to place
-a collection of reflective panels, beam splitters and light-pipes to protect
-your four 'key' blocks.  On each turn one can move one piece any number of 
-unblocked squares north, south, east or west and then rotate the piece.
-Alternatively, a player may opt to move and fire a laser from the back row.
-If a laser hits a piece from an unprotected direction, the piece is destroyed.
-Play continues back and forth until one player has lost all of their 'key'
-blocks.
+This is an old logic simulator written back in 1986 for the Apple II.  It
+made it possible to play around with simple networks of basic one and two
+input logic gates. Up to 8 inputs are supported and the simulation is run
+for 8 clocks.  Note: execution is synchronous, that is gate delay is not
+part of the simulation.  Thus, entities such as flip-flops may not run
+in deterministic fashion, but they will generally resolve as expected.
 
-In 2024, the original source code to the game was unearthed and the original
-programmer decided to fix up the project enough so that it was playable again.
-The resulting source code is in this repo and one can download a generated
-disk image from itch.io.
+In 2024, the original source code to the simulator was unearthed and the original
+programmer decided to fix up the project enough so that it could be rebuilt
+from source and run.   Originally, the program was written for DOS 3.3
+but was converted over to ProDOS recently as can be seen in the github 
+history.  The resulting source code is in this repo and one can
+download a generated disk image from itch.io.
 
 Details
 -------
-The game is written entirely in Merlin 6502 assembly.
+The program is written in a combination of AppleSoft and Merlin 6502 assembly.
 
 There is a build script in this repo that is capable of generating a .2mg file 
 from the sources.  It requires several tools to be installed:
@@ -48,7 +47,7 @@ from the sources.  It requires several tools to be installed:
 If one places the CiderPress CLI in a subdirectory named 'ciderpress' (ciderpress/cp2.exe)
 and places the Merlin package in a subdirectory named 'merlin32' 
 (merlin32\\Windows\\Merlin32.exe), then the following commands will build
-the `deflection.2mg` file:
+the `DigiSim_Release.2mg` file:
 
 .. code::
 
@@ -61,7 +60,32 @@ One can adjust the pathnames to CiderPress and Merlin at the top of the build.py
 
 Documentation and Issues
 ------------------------
-TODO
+The simulator allows for the placement of gates and waveform sources on a 32x32
+grid.  One can use IJKM or the arrow keys to move about the grid.  This can be
+via single cell or by "pages" of 8 cells (the 'S' key will toggle between modes).
+
+There are 8 sources and both the raw and inverse value of a source can be placed 
+in the network.  A fairly complete list of one and two input gates are supported
+including: NOT, AND, NAND, OR, NOR, EOR, NEOR.  There is also a "NONE" gate that
+is used to remove a gate or waveform from a grid cell.  The specific wave or gate
+to be placed are displayed on the right side of the display and there are keys 
+to select between them.  
+
+Highlighting a placed gate or source will display their simulated or setup values
+respectively.  Gates can be edited to specify the coordinates of the inputs to 
+the gate.  A waveform can be redefined using the number keys to select the waveform
+and then the 1&0 keys to enter the 8 values.  The simulation can be updated using
+the 'A' key which recomputes all of the gate outputs.
+
+.. note::
+
+   All of the keystrokes can be seen by pressing '?' to display a help screen.
+
+
+Other options: loading, saving and quitting the program are accessed using the 
+utilities menu via the 'U' key.  Generally, simulation files have been saved
+using the '.DS' suffix, but this is not enforced by the program.  All files are
+8200 byte files of type BIN. 
 
 
 Please feel free to post issues and other questions at `DigiSim Issues
@@ -74,9 +98,10 @@ a simpler download option and forum to discuss more gameplay related issues.
 
 Things To Do
 ~~~~~~~~~~~~
-TODO
+The display of wires is extremely crude.  It needs to be reworked to avoid gates
+and attempt to bend around each other a bit.
 
 
 License
 -------
-`SigiSim` is licensed under the MIT license.
+`DigiSim` is licensed under the MIT license.

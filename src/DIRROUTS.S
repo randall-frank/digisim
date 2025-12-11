@@ -92,7 +92,14 @@ WORKING
                           ; handle PR_MODE_OK and PR_MODE_CANCEL
 :tryret  CMP   #141       ; return character
          BNE   WORKING
-         DEY
+         CPY   #PR_MODE_OK
+         BNE   :cancel
+         LDA   RETLEN     ; empty target filename
+         BEQ   WORKING
+         LDA   PREFIX     ; unset prefix
+         CMP   #2
+         BLT   WORKING
+:cancel  DEY
          DEY
          STY   RETSTATUS
          RTS
@@ -399,7 +406,19 @@ DRAWNAME
          LDA   PR_XPOS
          CMP   #16
          BLT   :nocurs
-         RTS
+         LDX   #10
+         LDY   #18
+         JSR   PR_SET_POS
+         LDA   RETLEN
+         BNE   :nameok
+         LDY   #>INVALIDTXT
+         LDA   #<INVALIDTXT
+         JMP   PR_OUTSTR
+:nameok  LDA   #10
+         JMP   PR_OUTCHAR
+
+INVALIDTXT ASC "(invalid)"
+         HEX   0A00
 
 DRAWPREFIX
          LDX   #1
@@ -414,6 +433,17 @@ DRAWPREFIX
          JSR   PR_OUTCHAR
          LDA   #$00
          STA   PR_MASK
+         LDX   #16
+         LDY   #2
+         JSR   PR_SET_POS
+         LDA   PREFIX
+         CMP   #2
+         BGE   :dirok
+         LDY   #>INVALIDTXT
+         LDA   #<INVALIDTXT
+         JMP   PR_OUTSTR
+:dirok   LDA   #10
+         JMP   PR_OUTCHAR
          RTS
 
 DRAWFILES                  ; 9 filenames starting at line 8

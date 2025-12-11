@@ -2,8 +2,9 @@
  6 JOY = 0: REM  JOYSTICK TOGGLE
  10  HIMEM: 3*4096 + 4*256: REM HIMEM: 4 * 4096
  11  ONERR  GOTO 6005
+ 15  GOSUB 3000
  20 X = 0:Y = 0:XP = 0:YP = 0:PG=0
- 25 W1 = 1:F$ = "BLANKDATA"
+ 25 W1 = 1:F$ = "BLANKDATA.DS"
  30  GOSUB 10000
  40 GS = 1
  55  GOSUB 16020
@@ -54,25 +55,25 @@
  320  GOTO 200
  500  REM  HELP SCREEN
  510  TEXT: HOME
- 511  VTAB 1: HTAB 1: PRINT "     DigiSim Logic Simulator v1.0.0"
+ 511  VTAB 2: PRINT "     DigiSim Logic Simulator v";VN$
  512  PRINT "           Copyright (C) 1986"
  513  PRINT "     Randy Frank and David Richards"
- 514  VTAB 5:A$ = "Action": GOSUB 690
- 515  VTAB 5: PRINT "  Key"
- 520  VTAB 7: PRINT "IJKM,arrows Select (X,Y) coordinates"
+ 514  VTAB 6:A$ = "Action": GOSUB 690
+ 515  VTAB 6: PRINT "  Key"
+ 520  VTAB 8: PRINT "IJKM,arrows Select (X,Y) coordinates"
  525  V$ = "SINGLE/page" : IF PG = 1 THEN V$ = "single/PAGE"
- 530  VTAB 8: PRINT "S           Step by "+V$
- 540  VTAB 9: PRINT "L,O          Select gate"
- 550  VTAB 10: PRINT "P,;         Select waveform"
- 560  VTAB 11: PRINT "W           Put waveform source at (X,Y)"
- 570  VTAB 12: PRINT "SPACE       Put a gate at (X,Y)"
- 580  VTAB 13: PRINT "E           Edit links to (X,Y)"
- 590  VTAB 14: PRINT "T           Toggle wire display (On/Off)"
- 600  VTAB 15: PRINT "U           Utilities (I/O, exit, ...)"
- 610  VTAB 16: PRINT "A           Analyze current circuit"
- 615  VTAB 17: PRINT "1-8         Edit corresponding waveform"
- 620  VTAB 18: PRINT "?           Display help "
- 625  VTAB 20: PRINT "       Press any key to return"; : GET A$
+ 530  PRINT "S           Step by "+V$
+ 540  PRINT "L,O         Select gate type to place"
+ 550  PRINT "SPACE       Place gate at (X,Y)"
+ 560  PRINT "P,;         Select waveform to place"
+ 570  PRINT "W           Place waveform at (X,Y)"
+ 580  PRINT "E           Edit links to (X,Y)"
+ 590  PRINT "T           Toggle wire display"
+ 600  PRINT "U           Utilities (I/O, exit, ...)"
+ 610  PRINT "A           Analyze current circuit"
+ 615  PRINT "1-8         Edit corresponding waveform"
+ 620  PRINT "?           Display help "
+ 625  PRINT: PRINT "       Press any key to return"; : GET A$
  630  POKE 49232,0: POKE 49234,0: POKE 49237,0: POKE 49239,0: RETURN 
  690  HTAB 20 -  INT ( LEN (A$) / 2): PRINT A$: RETURN 
  695  PRINT A$: RETURN 
@@ -119,12 +120,17 @@
  2310 N = PEEK(A) : IF N < 1 THEN RETURN
  2320 FOR I=1 TO N : F$ = F$ + CHR$(PEEK(A+I)) : NEXT I
  2330 RETURN
+ 3000 PRINT CHR$(4);"OPEN DSAPP/VERSION"
+ 3010 PRINT CHR$(4);"READ DSAPP/VERSION"
+ 3020 INPUT VN$
+ 3030 PRINT CHR$(4);"CLOSE DSAPP/VERSION"
+ 3040 RETURN
  6000  REM  :: UTILITIES
  6001 D = 1:S = 6
  6002  ONERR  GOTO 6005
  6003  GOTO 6010
- 6005  TEXT : HOME : PRINT "An error had occurred.  Select again:": GOTO 6020
- 6010  TEXT : HOME : PRINT "       Utilities:" : PRINT : PRINT
+ 6005  TEXT : HOME : PRINT : PRINT "An error had occurred.  Select again:": GOTO 6020
+ 6010  TEXT : HOME : PRINT : PRINT "       Utilities:" : PRINT : PRINT
  6020  PRINT "      1) Load a circuit" : PRINT
  6040  PRINT "      2) Save a circuit" : PRINT
  6051  IF JOY = 1 THEN A$ = "Joystick/Keyboard"
@@ -134,11 +140,11 @@
  6055  PRINT "      5) Return to analysis" : PRINT
  6057  PRINT "      6) Exit to AppleSoft Basic" : PRINT
  6058  PRINT "      7) ProDOS BYE" : PRINT
- 6060  VTAB 20: HTAB 10: PRINT "Enter selection:";: GET A$: IF A$ < "1" OR A$ > "7" THEN 6060
- 6070  HOME : ON  VAL (A$) GOTO 6200,6300,6700,6800,6500,6650,6850
+ 6060  PRINT : HTAB 10: PRINT "Enter selection:";: GET A$: IF A$ < "1" OR A$ > "7" THEN 6060
+ 6070  HOME : ON  VAL (A$) GOTO 6200,6300,6700,6800,6500,6600,6900
  6200  GOSUB 2000
  6210  IF F$ = "" THEN 6010
- 6220  PRINT : PRINT CHR$(4);"BLOAD ";F$;",A$6000"
+ 6220  PRINT : PRINT CHR$(4);"BLOAD ";F$;",A$6000,L$2008"
  6230  GOSUB 11000: GOSUB 12000: GOSUB 13000
  6240  GOTO 6010
  6300  GOSUB 2100
@@ -146,20 +152,20 @@
  6320  PRINT : PRINT CHR$(4);"BSAVE ";F$;",A$6000,L$2008"
  6330  GOTO 6010
  6500  POKE 49232,0: POKE 49234,0: POKE 49237,0: POKE 49239,0: GOTO 25
- 6600  VTAB 12: HTAB 1: PRINT "Enter filename:";: INPUT F$
- 6610  RETURN 
- 6650  VTAB 12: HTAB 1: PRINT "OK to quit? (Y/N)";: GET A$: IF A$ <  > "Y" AND A$ <  > "N" THEN 6650
- 6660  IF A$ = "N" THEN 6010
- 6670  TEXT : HOME : PRINT "Bye...": END 
+ 6600  VTAB 12: HTAB 1: PRINT "Quit to AppleSoft Basic? (Y/N)";: GET A$: IF A$ <  > "Y" AND A$ <  > "N" THEN 6600
+ 6610  IF A$ = "N" THEN PRINT "NO": GOTO 6010
+ 6620  TEXT : HOME : PRINT "Bye...": END 
  6700  REM  CLEAR CIRCUIT
- 6710  PRINT : PRINT "Clear the circuit? (Y/N)";: GET A$: IF A$ <  > "Y" AND A$ <  > "N" THEN  PRINT  CHR$ (7): GOTO 6710
+ 6710  VTAB 12: HTAB 1: PRINT "Clear the circuit? (Y/N)";: GET A$: IF A$ <  > "Y" AND A$ <  > "N" THEN  PRINT  CHR$ (7): GOTO 6710
  6720  IF A$ = "N" THEN  PRINT "NO": GOTO 6010
  6730  IF A$ = "Y" THEN  PRINT "YES"
- 6740  PRINT  CHR$ (4)"BLOAD BLANKDATA,A$6000,S";S;",D";D
+ 6740  PRINT  CHR$ (4);"BLOAD BLANKDATA.DS,A$6000"
  6750  GOTO 6010
  6800  REM JOYSTICK TOGGLE
  6810 JOY =  NOT (JOY): GOTO 6010
- 6850  PRINT  CHR$ (4)"BYE"
+ 6900  VTAB 12: HTAB 1: PRINT "Exit via ProDOS BYE? (Y/N)";: GET A$: IF A$ <  > "Y" AND A$ <  > "N" THEN 6900
+ 6910  IF A$ = "N" THEN PRINT "NO": GOTO 6010
+ 6920  PRINT  CHR$ (4);"BYE"
  7000  REM  WAVEFORM MODIFICATION
  7010 W =  VAL (A$)
  7050 A$ = "ENTER #" +  STR$ (W) + " (USE 1&0):XXXXXXXX"

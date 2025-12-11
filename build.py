@@ -25,7 +25,7 @@ if not prerequisites:
 
 # Set the version number and start the build process
 # Must be 5 characters
-version = "1.0.1"
+version = "1.1.0"
 
 # Burn the version number into the source file VERSION.S 
 log.info("Generating 6502 source code...")
@@ -33,6 +33,8 @@ with open(os.path.join("src","VERSION.S"), "w") as out:
     text = f"        ASC '{version}'\n"
     out.write(text)
 
+with open(os.path.join("bin", "VERSION#040000"), "w") as out:
+    out.write(version)
 
 files = ["DRAWING2.S", "LOGIC2.S", "DIRROUTS.S"]
 
@@ -66,6 +68,9 @@ log.info(f"Created release disk image: {result.stdout} {result.stderr}")
 cmd = [ciderpresscli, "rename", rel_filename, ":", f"DIGISIM_{version}"]
 result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 log.info(f"Renamed release disk image: {result.stdout} {result.stderr}")
+cmd = [ciderpresscli, "mkdir", rel_filename, "DSAPP"]
+result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+log.info(f"Create APP directory: {result.stdout} {result.stderr}")
 
 # Copy system files - PRODOS, BASIC...  
 try:
@@ -78,6 +83,9 @@ log.info(f"System files added to disk image: {result.stdout} {result.stderr}")
 
 for name in os.listdir("basic"):
     if name.upper().endswith(".ABAS"):
+        subdir = ":DSAPP"
+        if name.upper().startswith("STARTUP"):
+            subdir = ""
         root = os.path.splitext(name)[0]
         try:
             os.remove(os.path.join("basic", root))
@@ -85,14 +93,17 @@ for name in os.listdir("basic"):
             pass
         # make a temp copy to rename the file so the import is clean
         shutil.copy(os.path.join("basic", name), os.path.join("basic", root))
-        cmd = [ciderpresscli, "import", "--strip-paths", rel_filename, "bas",  f"basic/{root}"]
+        cmd = [ciderpresscli, "import", "--strip-paths", rel_filename+subdir, "bas",  f"basic/{root}"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         os.remove(os.path.join("basic", root))
         log.info(f"Imported: basic/{name} as {root}")
 
 for name in os.listdir("bin"):
     if not name.startswith("_"):
-        cmd = [ciderpresscli, "add", "--strip-paths", rel_filename, f"bin/{name}"]
+        subdir = ":DSAPP"
+        if ".DS" in name.upper():
+            subdir = ""
+        cmd = [ciderpresscli, "add", "--strip-paths", rel_filename+subdir, f"bin/{name}"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         log.info(f"Imported: {name}")
 

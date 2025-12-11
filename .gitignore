@@ -3,6 +3,7 @@ ciderpres*/
 bin/LOGIC2*
 bin/DRAWING2*
 bin/DIRROUTS*
+bin/VERSION*
 bin/_*
 /*.2mg
 .vscode/
