@@ -88,7 +88,7 @@ burn a 5.25" disk with the image.  Thanks to the great work by Chris Torrence
 and Michael Morrison on the `Apple2TS <https://github.com/ct6502/apple2ts>`_ browser 
 hosted Apple II emulator, one can play the game via a web browser.  
 
-`Play DIAFLW in a browser <https://apple2ts.com/?appmode=game&theme=dark#https://github.com/randall-frank/digisim/releases/download/v1.2.0/DigiSim_Release.po>`_
+`Run DigiSim in a browser <https://apple2ts.com/?appmode=game&theme=dark#https://github.com/randall-frank/digisim/releases/download/v1.2.0/DigiSim_Release.po>`_
 
 Please feel free to post issues and other questions at `DigiSim Issues
 <https://github.com/randall-frank/digisim/issues>`_. This is the best place
