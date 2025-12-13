@@ -25,7 +25,7 @@ if not prerequisites:
 
 # Set the version number and start the build process
 # Must be 5 characters
-version = "1.1.0"
+version = "1.2.0"
 
 # Burn the version number into the source file VERSION.S 
 log.info("Generating 6502 source code...")
@@ -55,9 +55,9 @@ for name in files:
         sys.exit(1)
 os.chdir(orig_dir)
 
-log.info("Building .2mg disk image...")
-# Create a release .2mg image
-rel_filename = "DigiSim_Release.2mg"
+log.info("Building .po disk image...")
+# Create a release .po image
+rel_filename = "DigiSim_Release.po"
 try:
     os.remove(rel_filename)
 except Exception:

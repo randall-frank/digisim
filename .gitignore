@@ -6,6 +6,7 @@ bin/DIRROUTS*
 bin/VERSION*
 bin/_*
 /*.2mg
+/*.po
 .vscode/
 src/VERSION.S
 older/

@@ -47,7 +47,7 @@ from the sources.  It requires several tools to be installed:
 If one places the CiderPress CLI in a subdirectory named 'ciderpress' (ciderpress/cp2.exe)
 and places the Merlin package in a subdirectory named 'merlin32' 
 (merlin32\\Windows\\Merlin32.exe), then the following commands will build
-the `DigiSim_Release.2mg` file:
+the `DigiSim_Release.po` file:
 
 .. code::
 
@@ -83,6 +83,12 @@ utilities menu via the 'U' key.  Generally, simulation files have been saved
 using the '.DS' suffix, but this is not enforced by the program.  All files are
 8200 byte files of type BIN. 
 
+Normally, one would download the `.po` file and use it with an emulator or 
+burn a 5.25" disk with the image.  Thanks to the great work by Chris Torrence
+and Michael Morrison on the `Apple2TS <https://github.com/ct6502/apple2ts>`_ browser 
+hosted Apple II emulator, one can play the game via a web browser.  
+
+`Play DIAFLW in a browser <https://apple2ts.com/?appmode=game&theme=dark#https://github.com/randall-frank/digisim/releases/download/v1.2.0/DigiSim_Release.po>`_
 
 Please feel free to post issues and other questions at `DigiSim Issues
 <https://github.com/randall-frank/digisim/issues>`_. This is the best place
