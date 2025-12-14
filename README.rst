@@ -37,7 +37,7 @@ Details
 -------
 The program is written in a combination of AppleSoft and Merlin 6502 assembly.
 
-There is a build script in this repo that is capable of generating a .2mg file 
+There is a build script in this repo that is capable of generating a .po file 
 from the sources.  It requires several tools to be installed:
 
 - Python
@@ -86,7 +86,7 @@ using the '.DS' suffix, but this is not enforced by the program.  All files are
 Normally, one would download the `.po` file and use it with an emulator or 
 burn a 5.25" disk with the image.  Thanks to the great work by Chris Torrence
 and Michael Morrison on the `Apple2TS <https://github.com/ct6502/apple2ts>`_ browser 
-hosted Apple II emulator, one can play the game via a web browser.  
+hosted Apple II emulator, one can run the program via a web browser.  
 
 `Run DigiSim in a browser <https://apple2ts.com/?appmode=game&theme=dark#https://github.com/randall-frank/digisim/releases/download/v1.2.0/DigiSim_Release.po>`_
 
@@ -94,8 +94,8 @@ Please feel free to post issues and other questions at `DigiSim Issues
 <https://github.com/randall-frank/digisim/issues>`_. This is the best place
 to post questions and code.
 
-The game is also hosted on `itch.io <https://myleftgoat.itch.io/digisim>`_ which provides
-a simpler download option and forum to discuss more gameplay related issues.
+The program is also hosted on `itch.io <https://myleftgoat.itch.io/digisim>`_ which provides
+a simpler download option and forum to discuss more execution related issues.
 
 
 Things To Do
